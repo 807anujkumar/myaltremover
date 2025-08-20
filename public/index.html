@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML Fix Tool</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: #eef3f9; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      margin: 0;
+    }
+    .container {
+      display: flex;
+      background: white; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+      max-width: 900px;
+      width: 100%;
+    }
+    .illustration {
+      background: #f0f7ff; 
+      flex: 1; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      padding: 20px;
+    }
+    .illustration img {
+      width: 100%; 
+      max-width: 280px;
+    }
+    .box {
+      flex: 1; 
+      padding: 40px;
+    }
+    h2 { margin-top: 0; color: #0077ff; }
+    input { 
+      width: 100%; 
+      padding: 12px; 
+      margin: 15px 0; 
+      border-radius: 8px; 
+      border: 1px solid #ccc; 
+    }
+    button { 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 8px; 
+      background: #0077ff; 
+      color: white; 
+      font-size: 16px;
+      cursor: pointer; 
+      transition: 0.3s; 
+    }
+    button:hover { background: #005bcc; }
+    pre { 
+      background: #f8f8f8; 
+      padding: 12px; 
+      border-radius: 8px; 
+      max-height: 200px; 
+      overflow-y: auto; 
+      font-size: 14px;
+    }
+    /* Popup modal */
+    .modal {
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.6);
+      justify-content: center; 
+      align-items: center;
+    }
+    .modal-content {
+      background: white; 
+      padding: 30px; 
+      border-radius: 12px; 
+      text-align: center; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: zoomIn 0.3s ease;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-content h3 {
+      margin: 0 0 10px; 
+      color: green;
+    }
+    .close-btn {
+      margin-top: 15px;
+      padding: 8px 18px;
+      background: #0077ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      background: #005bcc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left AI illustration -->
+    <div class="illustration">
+      <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI Illustration">
+    </div>
+
+    <!-- Right side UI -->
+    <div class="box">
+      <h2>🛠 HTML Fix Tool</h2>
+      <p>Enter folder path where your HTML/XHTML files are located:</p>
+      <input type="text" id="folder" placeholder="e.g. C:\\Users\\anuj\\Documents\\html" />
+      <button onclick="runFix()">Run Fix</button>
+      <h3>Logs:</h3>
+      <pre id="logs"></pre>
+    </div>
+  </div>
+
+  <!-- Popup modal -->
+  <div class="modal" id="doneModal">
+    <div class="modal-content">
+      <h3>✅ Your all files done!</h3>
+      <button class="close-btn" onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    async function runFix() {
+      const folder = document.getElementById("folder").value;
+      document.getElementById("logs").textContent = "⏳ Running...";
+      const res = await fetch("/run-fix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder })
+      });
+      const data = await res.json();
+      document.getElementById("logs").textContent = data.log.join("\n");
+
+      // Show popup after completion
+      document.getElementById("doneModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("doneModal").style.display = "none";
+    }
+  </script>
+</body>
+</html>
