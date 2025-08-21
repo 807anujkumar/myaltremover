@@ -23,36 +23,44 @@ app.post("/run-fix", (req, res) => {
 
     const $ = cheerio.load(content, { xmlMode: false, decodeEntities: false });
 
-    // 1) fix img alt
-    $("img").each((i, el) => {
-      if ($(el).attr("alt") !== undefined) {
-        $(el).attr("alt", "");
-      }
-    });
+    let fileChanged = false; // 🔑 track karne ke liye
 
-    // 2) fix span+mathml
+    // ✅ sirf span+mathml ke just baad wale <img> ko fix karo
     $("span").each((i, el) => {
       const $el = $(el);
 
       if ($el.find("math").length > 0) {
-        // ensure class=hidden only
-        $el.attr("class", "hidden");
-        $el.removeAttr("aria-hidden");
+        // check agar already correct hai to skip
+        if ($el.attr("class") !== "hidden" || $el.attr("aria-hidden") !== undefined) {
+          $el.attr("class", "hidden");
+          $el.removeAttr("aria-hidden");
+          fileChanged = true;
+        }
 
         // add aria-hidden to immediate next img
         let next = $el.next();
         if (next.is("img")) {
-          next.attr("aria-hidden", "true");
+          if (next.attr("aria-hidden") !== "true") {
+            next.attr("aria-hidden", "true");
+            fileChanged = true;
+          }
+          if (next.attr("alt") !== "") {
+            next.attr("alt", "");
+            fileChanged = true;
+          }
         }
       }
     });
 
-    const output = $.html({ selfClosingTags: true });
-    fs.writeFileSync(filePath, output, "utf8");
-    logs.push("✔ Fixed: " + file);
+    // ❌ agar koi change hi nahi hua to skip writing
+    if (fileChanged) {
+      const output = $.html({ selfClosingTags: true });
+      fs.writeFileSync(filePath, output, "utf8");
+      logs.push("✔ Fixed: " + file);
+    }
   });
 
-  res.json({ success: true, log: logs });
+  res.json({ success: true, log: logs.length ? logs : ["ℹ No changes needed"] });
 });
 
 app.listen(3000, () => {
