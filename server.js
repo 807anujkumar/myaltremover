@@ -28,7 +28,7 @@ app.post("/run-fix", (req, res) => {
     // ✅ sirf span+mathml ke just baad wale <img> ko fix karo
     $("span").each((i, el) => {
       const $el = $(el);
-
+      console.log(`this is  then name of the all thing ${el} `);
       if ($el.find("math").length > 0) {
         // check agar already correct hai to skip
         if ($el.attr("class") !== "hidden" || $el.attr("aria-hidden") !== undefined) {
